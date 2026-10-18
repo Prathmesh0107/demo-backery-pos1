@@ -1,0 +1,23 @@
+# Render Blueprint: one web service + one PostgreSQL database
+databases:
+  - name: rush-pos-db
+    plan: free
+    databaseName: rushpos
+    user: rushpos
+services:
+  - type: web
+    name: rush-pos-demo
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: OWNER_PIN   # optional: set a value in the Render dashboard to lock Stock, Printer and Reset behind a PIN
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: rush-pos-db
+          property: connectionString
